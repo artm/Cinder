@@ -153,7 +153,7 @@ class AntMgr {
 
 } // anonymous namespace
 
-void initAntGl()
+static void initAntGl()
 {
 	static std::shared_ptr<AntMgr> mgr;
 	if( ! mgr )
@@ -161,6 +161,7 @@ void initAntGl()
 }
 
 
+//! Constructs a GUI window with given initial parameters.
 InterfaceGl::InterfaceGl( const std::string &title, const Vec2i &size, const ColorA color )
 {
 	initAntGl();
@@ -172,23 +173,27 @@ InterfaceGl::InterfaceGl( const std::string &title, const Vec2i &size, const Col
 	TwCopyStdStringToClientFunc( implStdStringToClient );
 }
 
+//! Draw all visible windows
 void InterfaceGl::draw()
 {
 	TwDraw();
 }
 
+//! Set window visibility (by default: make visible)
 void InterfaceGl::show( bool visible )
 {
 	int32_t visibleInt = ( visible ) ? 1 : 0;
 	TwSetParam( mBar.get(), NULL, "visible", TW_PARAM_INT32, 1, &visibleInt );
 }
 
+//! Hide window
 void InterfaceGl::hide()
 {
 	int32_t visibleInt = 0;
 	TwSetParam( mBar.get(), NULL, "visible", TW_PARAM_INT32, 1, &visibleInt );
 }
 
+//! Query if window is visible
 bool InterfaceGl::isVisible() const
 {
 	int32_t visibleInt;
@@ -204,46 +209,113 @@ void InterfaceGl::implAddParam( const std::string &name, void *param, int type, 
 		TwAddVarRW( mBar.get(), name.c_str(), (TwType)type, param, optionsStr.c_str() );
 }
 
+/** Add a boolean parameter.
+ *
+ * \param name param name, will be used a a label in a gui
+ * \param param address of a value to display / modify
+ * \param optionsStr widget options, see \ref optionsStr
+ * \param readOnly whether param is read only
+ */
 void InterfaceGl::addParam( const std::string &name, bool *param, const std::string &optionsStr, bool readOnly )
 {
 	implAddParam( name, param, TW_TYPE_BOOLCPP, optionsStr, readOnly );
 } 
 
+/** Add a float parameter.
+ *
+ * \param name param name, will be used a a label in a gui
+ * \param param address of a value to display / modify
+ * \param optionsStr widget options, see \ref optionsStr
+ * \param readOnly whether param is read only
+ */
 void InterfaceGl::addParam( const std::string &name, float *param, const std::string &optionsStr, bool readOnly )
 {
 	implAddParam( name, param, TW_TYPE_FLOAT, optionsStr, readOnly );
 } 
 
+/** Add a int32_t parameter.
+ *
+ * \param name param name, will be used a a label in a gui
+ * \param param address of a value to display / modify
+ * \param optionsStr widget options, see \ref optionsStr
+ * \param readOnly whether param is read only
+ */
 void InterfaceGl::addParam( const std::string &name, int32_t *param, const std::string &optionsStr, bool readOnly )
 {
 	implAddParam( name, param, TW_TYPE_INT32, optionsStr, readOnly );
 } 
 
+/** Add a vector parameter
+ *
+ * \param name param name, will be used a a label in a gui
+ * \param param address of a value to display / modify
+ * \param optionsStr widget options, see \ref optionsStr
+ * \param readOnly whether param is read only
+ *
+ * FIXME details...
+ */
 void InterfaceGl::addParam( const std::string &name, Vec3f *param, const std::string &optionsStr, bool readOnly )
 {
 	implAddParam( name, param, TW_TYPE_DIR3F, optionsStr, readOnly );
 } 
 
+/** Add a quaternion (rotation/orientation) parameter.
+ *
+ * \param name param name, will be used a a label in a gui
+ * \param param address of a value to display / modify
+ * \param optionsStr widget options, see \ref optionsStr
+ * \param readOnly whether param is read only
+ */
 void InterfaceGl::addParam( const std::string &name, Quatf *param, const std::string &optionsStr, bool readOnly )
 {
 	implAddParam( name, param, TW_TYPE_QUAT4F, optionsStr, readOnly );
 } 
 
+/* Add an opaque color parameter
+ *
+ * \param name param name, will be used a a label in a gui
+ * \param param address of a value to display / modify
+ * \param optionsStr widget options, see \ref optionsStr
+ * \param readOnly whether param is read only
+ */
 void InterfaceGl::addParam( const std::string &name, Color *param, const std::string &optionsStr, bool readOnly )
 {
 	implAddParam( name, param, TW_TYPE_COLOR3F, optionsStr, readOnly );
 } 
 
+/** Add a translucent color parameter.
+ *
+ * \param name param name, will be used a a label in a gui
+ * \param param address of a value to display / modify
+ * \param optionsStr widget options, see \ref optionsStr
+ * \param readOnly whether param is read only
+ */
 void InterfaceGl::addParam( const std::string &name, ColorA *param, const std::string &optionsStr, bool readOnly )
 {
 	implAddParam( name, param, TW_TYPE_COLOR4F, optionsStr, readOnly );
 } 
 
+/** Add a string parameter.
+ *
+ * \param name param name, will be used a a label in a gui
+ * \param param address of a value to display / modify
+ * \param optionsStr widget options, see \ref optionsStr
+ * \param readOnly whether param is read only
+ */
 void InterfaceGl::addParam( const std::string &name, std::string *param, const std::string &optionsStr, bool readOnly )
 {
 	implAddParam( name, param, TW_TYPE_STDSTRING, optionsStr, readOnly );
 }
 
+/* add enum parameter.
+ *
+ * \param name param name, will be used a a label in a gui
+ * \param param address of a value to display / modify
+ * \param optionsStr widget options, see \ref optionsStr
+ * \param readOnly whether param is read only
+ *
+ * FIXME: details?
+ */
 void InterfaceGl::addParam( const std::string &name, const std::vector<std::string> &enumNames, int *param, const std::string &optionsStr, bool readOnly )
 {
 	TwEnumVal *ev = new TwEnumVal[enumNames.size()];
@@ -262,11 +334,15 @@ void InterfaceGl::addParam( const std::string &name, const std::vector<std::stri
 	delete [] ev;
 }
 
+//! add widget separator
 void InterfaceGl::addSeparator( const std::string &name, const std::string &optionsStr )
 {
 	TwAddSeparator( mBar.get(), name.c_str(), optionsStr.c_str() );
 }
 
+/** Add a text label.
+ *
+ */
 void InterfaceGl::addText( const std::string &name, const std::string &optionsStr )
 {
 	TwAddButton( mBar.get(), name.c_str(), NULL, NULL, optionsStr.c_str() );
@@ -280,6 +356,10 @@ void TW_CALL implButtonCallback( void *clientData )
 } 
 } // anonymous namespace
 
+/** Add a button.
+ *
+ * Clicking a button will cause \arg callback function to be called.
+ */
 void InterfaceGl::addButton( const std::string &name, const std::function<void ()> &callback, const std::string &optionsStr )
 {
 	std::shared_ptr<std::function<void ()> > callbackPtr( new std::function<void ()>( callback ) );
@@ -287,6 +367,13 @@ void InterfaceGl::addButton( const std::string &name, const std::function<void (
 	TwAddButton( mBar.get(), name.c_str(), implButtonCallback, (void*)callbackPtr.get(), optionsStr.c_str() );
 }
 
+/** Set widget option
+ *
+ * Change widget's options (format and meaning of the \arg optionsStr is the
+ * same as in addParameter() methods.
+ *
+ * \see \ref optionsStr
+ */
 void InterfaceGl::setOptions( const std::string &name, const std::string &optionsStr )
 {
 	std::string target = "`" + (std::string)TwGetBarName( mBar.get() ) + "`";
