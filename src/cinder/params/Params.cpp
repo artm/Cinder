@@ -22,10 +22,14 @@
 
 #include "cinder/app/App.h"
 #include "cinder/params/Params.h"
+#include "cinder/Filesystem.h"
 
 #include "AntTweakBar.h"
 
 #include <boost/assign/list_of.hpp>
+#include <boost/foreach.hpp>
+
+#include <ctype.h>
 
 using namespace std;
 
@@ -294,6 +298,57 @@ void InterfaceGl::setOptions( const std::string &name, const std::string &option
 		target += "/`" + name + "`";
 
 	TwDefine( ( target + " " + optionsStr ).c_str() );
+}
+
+std::string InterfaceGl::name2id( const std::string& name ) {
+	std::string id = "";
+	enum State { START, APPEND, UPCASE };
+	State state(START);
+
+	BOOST_FOREACH(char c, name) {
+		switch(state) {
+			case START:
+				if (isalpha(c)) {
+					id += c;
+					state = APPEND;
+				} else if (isdigit(c)) {
+					id = "_" + c;
+					state = APPEND;
+				}
+				break;
+			case APPEND:
+				if (isalnum(c)) {
+					id += c;
+				} else {
+					state = UPCASE;
+				}
+				break;
+			case UPCASE:
+				if (islower(c)) {
+					id += toupper(c);
+					state = APPEND;
+				} else if (isalnum(c)) {
+					id += c;
+					state = APPEND;
+				}
+				break;
+		}
+	}
+	return id;
+}
+
+void InterfaceGl::load(const std::string& fname)
+{
+	filename() = fname;
+	if (fs::exists( fname )) {
+		root() = XmlTree( loadFile(fname) );
+	}
+}
+
+void InterfaceGl::save() {
+	BOOST_FOREACH(boost::function<void()> f, persistCallbacks())
+		f();
+	root().write( writeFile(filename()) );
 }
 
 } } // namespace cinder::params
