@@ -174,6 +174,8 @@ InterfaceGl::InterfaceGl( const std::string &title, const Vec2i &size, const Col
 	TwDefine( optionsStr );
 	
 	TwCopyStdStringToClientFunc( implStdStringToClient );
+	
+	m_id = name2id(title);
 }
 
 void InterfaceGl::draw()
