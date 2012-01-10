@@ -353,4 +353,87 @@ void InterfaceGl::save() {
 	root().write( writeFile(filename()) );
 }
 
+void InterfaceGl::addPersistentSizeAndPosition()
+{
+	int size[2];
+	TwGetParam( mBar.get(), NULL, "size", TW_PARAM_INT32, 2, size );
+
+	std::string idW = name2id("width");
+	size[0] = getXml().hasChild(idW)
+		? getXml().getChild(idW).getValue((float)size[0])
+		: size[0];
+
+	std::string idH = name2id("height");
+	size[1] = getXml().hasChild(idH)
+		? getXml().getChild(idH).getValue((float)size[1])
+		: size[1];
+
+	TwSetParam( mBar.get(), NULL, "size", TW_PARAM_INT32, 2, size );
+
+	int pos[2];
+	TwGetParam( mBar.get(), NULL, "position", TW_PARAM_INT32, 2, pos );
+
+	std::string idX = name2id("posx");
+	pos[0] = getXml().hasChild(idX)
+		? getXml().getChild(idX).getValue((float)pos[0])
+		: pos[0];
+
+	std::string idY = name2id("posy");
+	pos[1] = getXml().hasChild(idY)
+		? getXml().getChild(idY).getValue((float)pos[1])
+		: pos[1];
+
+	TwSetParam( mBar.get(), NULL, "position", TW_PARAM_INT32, 2, pos );
+
+	int icon;
+	TwGetParam( mBar.get(), NULL, "iconified", TW_PARAM_INT32, 1, &icon );
+
+	std::string idIcon = name2id("icon");
+	icon = getXml().hasChild(idIcon)
+		? getXml().getChild(idIcon).getValue((int)icon)
+		: icon;		
+
+	TwSetParam( mBar.get(), NULL, "iconified", TW_PARAM_INT32, 1, &icon );		
+
+	persistCallbacks().push_back(
+			boost::bind( &InterfaceGl::persistSizeAndPosition, this) );
+}
+
+void InterfaceGl::persistSizeAndPosition()
+{
+	int size[2];
+	TwGetParam( mBar.get(), NULL, "size", TW_PARAM_INT32, 2, size );
+
+	std::string idW = name2id("width");
+	if (!getXml().hasChild(idW))
+		getXml().push_back(XmlTree(idW,""));
+	getXml().getChild(idW).setValue(size[0]);
+
+	std::string idH = name2id("height");
+	if (!getXml().hasChild(idH))
+		getXml().push_back(XmlTree(idH,""));
+	getXml().getChild(idH).setValue(size[1]);
+
+	int pos[2];
+	TwGetParam( mBar.get(), NULL, "position", TW_PARAM_INT32, 2, pos );
+
+	std::string idX = name2id("posx");
+	if (!getXml().hasChild(idX))
+		getXml().push_back(XmlTree(idX,""));
+	getXml().getChild(idX).setValue(pos[0]);
+
+	std::string idY = name2id("posy");
+	if (!getXml().hasChild(idY))
+		getXml().push_back(XmlTree(idY,""));
+	getXml().getChild(idY).setValue(pos[1]);
+
+	int icon;
+	TwGetParam( mBar.get(), NULL, "iconified", TW_PARAM_INT32, 1, &icon );
+
+	std::string idIcon = name2id("icon");
+	if (!getXml().hasChild(idIcon))
+		getXml().push_back(XmlTree(idIcon,""));
+	getXml().getChild(idIcon).setValue(icon);
+}
+
 } } // namespace cinder::params
